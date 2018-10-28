@@ -16,15 +16,19 @@
 
 package io.plaidapp.designernews.ui.story
 
-import com.google.android.material.textfield.TextInputLayout
-import androidx.recyclerview.widget.RecyclerView
+import android.animation.Animator
+import android.animation.AnimatorSet
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
-
-import io.plaidapp.designernews.R
+import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textfield.TextInputLayout
 import io.plaidapp.core.designernews.domain.model.Comment
+import io.plaidapp.core.util.AnimUtils.getFastOutSlowInInterpolator
+import io.plaidapp.designernews.R
 
 /**
  * View holder for a Designer News comment reply.
@@ -33,12 +37,73 @@ import io.plaidapp.core.designernews.domain.model.Comment
 internal class CommentReplyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     val commentVotes: Button = itemView.findViewById(R.id.comment_votes)
-    val replyLabel: TextInputLayout = itemView.findViewById(R.id.comment_reply_label)
+    private val replyLabel: TextInputLayout = itemView.findViewById(R.id.comment_reply_label)
     val commentReply: EditText = itemView.findViewById(R.id.comment_reply)
     val postReply: ImageButton = itemView.findViewById(R.id.post_reply)
 
     fun bindCommentReply(comment: Comment) {
         commentVotes.text = comment.upvotesCount.toString()
         commentVotes.isActivated = comment.upvoted != null && comment.upvoted
+    }
+
+    fun createCommentReplyFocusAnimator(): Animator {
+        val interpolator = getFastOutSlowInInterpolator(itemView.context)
+
+        commentVotes.animate()
+            .translationX((-commentVotes.width).toFloat())
+            .alpha(0f)
+            .setDuration(200L)
+            .interpolator = interpolator
+
+        replyLabel.animate()
+            .translationX((-commentVotes.width).toFloat())
+            .setDuration(200L)
+            .interpolator = interpolator
+
+        postReply.visibility = View.VISIBLE
+        postReply.alpha = 0f
+        postReply.animate()
+            .alpha(1f)
+            .setDuration(200L)
+            .interpolator = interpolator
+
+        return AnimatorSet().apply {
+            doOnStart {
+                itemView.setHasTransientState(true)
+            }
+            doOnEnd {
+                itemView.setHasTransientState(false)
+            }
+        }
+    }
+
+    fun createCommentReplyFocusLossAnimator(): Animator {
+        val interpolator = getFastOutSlowInInterpolator(itemView.context)
+
+        commentVotes.animate()
+            .translationX(0f)
+            .alpha(1f)
+            .setDuration(200L)
+            .interpolator = interpolator
+
+        replyLabel.animate()
+            .translationX(0f)
+            .setDuration(200L)
+            .interpolator = interpolator
+
+        postReply.animate()
+            .alpha(0f)
+            .setDuration(200L)
+            .interpolator = interpolator
+
+        return AnimatorSet().apply {
+            doOnStart {
+                itemView.setHasTransientState(true)
+            }
+            doOnEnd {
+                postReply.visibility = View.INVISIBLE
+                itemView.setHasTransientState(true)
+            }
+        }
     }
 }
