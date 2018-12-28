@@ -16,9 +16,7 @@
 
 package io.plaidapp.search.dagger
 
-import io.plaidapp.core.dagger.DataManagerModule
 import io.plaidapp.core.dagger.FilterAdapterModule
-import io.plaidapp.core.dagger.OnDataLoadedModule
 import io.plaidapp.core.dagger.SharedPreferencesModule
 import io.plaidapp.core.designernews.data.login.LoginLocalDataSource
 import io.plaidapp.search.ui.SearchActivity
@@ -36,8 +34,6 @@ object Injector {
         DaggerSearchComponent.builder()
             .activity(activity)
             .coreComponent(PlaidApplication.coreComponent(activity))
-            .dataManagerModule(DataManagerModule())
-            .dataLoadedModule(OnDataLoadedModule(null))
             .filterAdapterModule(FilterAdapterModule(activity))
             .sharedPreferencesModule(
                 SharedPreferencesModule(
